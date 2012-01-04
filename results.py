@@ -22,7 +22,7 @@ class Result(object):
 class ResultSet(set):
     def __init__(self):
         set.__init__(self)
-        self.db_path = modal.results_path
+        self.db_path = "results.hdf5"
         self.audio_file = ""
         self.run = ""
         self.match_time = ""
