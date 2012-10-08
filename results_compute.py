@@ -1,8 +1,9 @@
 import time
 import h5py
-import modal
-from progressbar import ProgressBar
 import numpy as np
+from progressbar import ProgressBar
+import modal
+
 
 def find_matches(ar1, ar2, limit):
     """For each element in ar1, see if there is a matching
@@ -12,18 +13,18 @@ def find_matches(ar1, ar2, limit):
     array is -1 if there is no match for this value. Each element
     can have at most 1 corresponding element (so each ar1 is mapped
     to at most 1 ar2 and vice versa).
-    
+
     Example: If the first element in ar1 has a matching element
              at the 3rd element in ar2, and r is the return array,
              r[0] = 2"""
     matches = np.ones(len(ar1)) * -1
     paired1 = np.zeros(len(ar1))
     paired2 = np.zeros(len(ar2))
-    n = 0 # the number of detected matches
-    
+    n = 0  # the number of detected matches
+
     for i in range(len(ar1)):
         for j in range(len(ar2)):
-            if np.abs(ar1[i]-ar2[j]) <= limit:
+            if np.abs(ar1[i] - ar2[j]) <= limit:
                 # potential match
                 if paired1[i] or paired2[j]:
                     continue
@@ -33,6 +34,7 @@ def find_matches(ar1, ar2, limit):
                     paired2[j] = 1
                     n += 1
     return n, matches
+
 
 def nearest_match(n, values):
     """Returns the nearest value in values to n, or None values is None."""
@@ -46,10 +48,12 @@ def nearest_match(n, values):
             distance = abs(n - values[i])
     return values[nearest]
 
+
 def add_params(group, target):
     """Add all members of target.attrs to the group.attrs"""
     for p in target.attrs:
         group.attrs[p] = target.attrs[p]
+
 
 if __name__ == "__main__":
     print "Calculating results..."
@@ -57,7 +61,7 @@ if __name__ == "__main__":
     pb.start()
     current_file = 0
     start_time = time.time()
-    
+
     try:
         onsets_db = h5py.File(modal.onsets_path, 'r')
         analysis_db = h5py.File('analysis.hdf5', 'r')
@@ -80,19 +84,19 @@ if __name__ == "__main__":
         odf_correctly_detected = {}
         odf_false_negatives = {}
         odf_false_positives = {}
-        
+
         for audio_file in analysis_db:
             # create a group in the results db for this audio file
             if audio_file in results_db['files']:
                 result_audio_group = results_db['files'][audio_file]
             else:
                 result_audio_group = results_db['files'].create_group(audio_file)
-                
+
             # get the correct information
             correct_locations = onsets_db[audio_file].attrs['onsets']
             sampling_rate = float(onsets_db[audio_file].attrs['sampling_rate'])
-            match_samples = (sampling_rate/1000.0) * match_time
-                    
+            match_samples = (sampling_rate / 1000.0) * match_time
+
             file = analysis_db[audio_file]
             for analysis in file:
                 # create a group for this analysis in the totals group
@@ -113,7 +117,9 @@ if __name__ == "__main__":
                 onsets = file[analysis]['onsets']
                 # check to see how many of the correct onset locations
                 # (entered manually) have a corresponding detected onset
-                # corresponding onsets are those within self.match_time milliseconds
+                # corresponding onsets are those within self.match_time
+                # milliseconds
+                #
                 # detection rate is calculated as a percentage of the number of
                 # correct onset locations
                 cd = find_matches(correct_locations, onsets,
@@ -122,12 +128,12 @@ if __name__ == "__main__":
                 if analysis in correctly_detected:
                     correctly_detected[analysis] += cd
                 else:
-                    correctly_detected[analysis] = cd 
+                    correctly_detected[analysis] = cd
                 if odf_type in odf_correctly_detected:
                     odf_correctly_detected[odf_type] += cd
                 else:
                     odf_correctly_detected[odf_type] = cd
-                
+
                 # false negatives
                 fn = len(correct_locations) - cd
                 r.attrs['false_negatives'] = fn
@@ -139,8 +145,9 @@ if __name__ == "__main__":
                     odf_false_negatives[odf_type] += fn
                 else:
                     odf_false_negatives[odf_type] = fn
-                
-                # check to see how many of the detected onsets are false positives,
+
+                # check to see how many of the detected onsets are false
+                # positives
                 # ie: they have no corresponding correct onset location
                 num_matches = find_matches(onsets, correct_locations,
                                            match_samples)[0]
@@ -154,8 +161,9 @@ if __name__ == "__main__":
                     odf_false_positives[odf_type] += fp
                 else:
                     odf_false_positives[odf_type] = fp
-                
-                # for each detected onset, get distance in samples to nearest correct onset
+
+                # for each detected onset, get distance in samples to nearest
+                # correct onset
                 if len(onsets):
                     nearest_onsets = []
                     for onset in onsets:
@@ -164,12 +172,12 @@ if __name__ == "__main__":
                     r.create_dataset('nearest_onsets', data=nearest_onsets)
                 # copy other onset detection parameters
                 add_params(r, onsets)
-                        
+
             # update progress bar
             current_file += 1
             pb.update(current_file)
         pb.finish()
-        
+
         # save total results for each analysis run
         print "Calculating totals for analysis runs..."
         for analysis, cd in correctly_detected.iteritems():
@@ -187,7 +195,7 @@ if __name__ == "__main__":
             g.attrs['recall'] = r
             g.attrs['f_measure'] = f
             g.attrs['false_positive_rate'] = fpr
-            
+
         # save total results for each ODF type
         print "Calculating totals for each Onset Detection Function..."
         for odf, cd in odf_correctly_detected.iteritems():
@@ -205,14 +213,13 @@ if __name__ == "__main__":
             odf_grp.attrs['recall'] = r
             odf_grp.attrs['f_measure'] = f
             odf_grp.attrs['false_positive_rate'] = fpr
-    
+
     finally:
         onsets_db.close()
         analysis_db.close()
         results_db.close()
-        
+
     print "Done. Total running time:",
     run_time = time.time() - start_time
-    print int(run_time / 60), "mins,", 
+    print int(run_time / 60), "mins,",
     print int(run_time % 60), "secs"
-

@@ -1,30 +1,26 @@
 import os
 import h5py
 import numpy as np
+import matplotlib.pyplot as plt
 import modal
 from modal.ui.plot import scheme
-import matplotlib.pyplot as plt
 
 # plot results to files?
 plot_results = True
+
 # result types to calculate
-cd_percentage = True
 f_measure = True
 precision = True
 recall = True
 false_positive_rate = True
 
-# ODFs to include in results 
-odfs = [
-    'EnergyODF', 'SpectralDifferenceODF', 'ComplexODF', 'LPEnergyODF', 
-    'LPSpectralDifferenceODF', 'LPComplexODF', 'PeakAmpDifferenceODF'
-]
+# ODFs to include in results
+odfs = ['EnergyODF', 'SpectralDifferenceODF', 'ComplexODF', 'LPEnergyODF',
+        'LPSpectralDifferenceODF', 'LPComplexODF', 'PeakAmpDifferenceODF']
 
 # shorter names for plotting
-odf_names = [
-    'Energy', 'SpecDiff', 'Complex', 
-    'LPE', 'LPSD', 'LPCD', 'PAD'
-]
+odf_names = ['Energy', 'SpecDiff', 'Complex',
+             'LPE', 'LPSD', 'LPCD', 'PAD']
 
 num_onsets = modal.num_onsets()
 db = h5py.File('results.hdf5', 'r')
@@ -34,67 +30,6 @@ if plot_results:
         os.mkdir('images')
 
 try:
-    # CD percentage
-    if cd_percentage:
-        results = {}
-        worst_hop_size = {}
-        worst_frame_size = {}
-        worst_prediction_frames = {}
-
-        for odf in odfs:
-            worst = 500.0
-            num_results = 0
-            for analysis in db['totals/analysis']:
-                if db['totals/analysis'][analysis].attrs['odf_type'] == odf:
-                    a = db['totals/analysis'][analysis]
-                    cdp = (a.attrs['correctly_detected'] * 100.0) / num_onsets
-                    if cdp < worst:
-                        worst = cdp
-                        worst_hop_size[odf] = str(a.attrs['hop_size'])
-                        worst_frame_size[odf] = str(a.attrs['frame_size'])
-                        if 'prediction_frames' in a.attrs:
-                            worst_prediction_frames[odf] = str(a.attrs['prediction_frames'])
-                        else:
-                            worst_prediction_frames[odf] = ''
-                    elif cdp == worst:
-                        worst_hop_size[odf] += ', ' + str(a.attrs['hop_size'])
-                        worst_frame_size[odf] += ', ' + str(a.attrs['frame_size'])
-                        if 'prediction_frames' in a.attrs:
-                            worst_prediction_frames[odf] += ', ' + str(a.attrs['prediction_frames'])
-            results[odf] = worst
-
-        for odf in odfs:
-            print odf + ':'
-            print 'cd percentage:', results[odf]
-            print 'hop size:', worst_hop_size[odf]
-            print 'frame size:', worst_frame_size[odf]
-            print 'prediction frames:', worst_prediction_frames[odf]
-            print
-
-        if plot_results:
-                    image_file = 'images/worst_cd_percentage.png'
-                    results = [results[odf] for odf in odfs]
-
-                    indexes = np.arange(len(odfs))
-                    width = 0.8
-                    colours, styles = scheme(len(odfs))
-                    fig = plt.figure(1, figsize=(12, 8))
-                    plt.title('Worst CD Percentage')
-                    ax = plt.axes()
-                    ax.autoscale(False, 'y')
-                    ax.set_ylim(0.0, 110.0)
-                    bars = ax.bar(indexes, results, width, color=colours[0])
-                    for bar in bars:
-                        height = bar.get_height()
-                        ax.text(bar.get_x()+bar.get_width()/2., 1.05*height, '%f'%height,
-                                ha='center', va='bottom')
-                    ax.set_ylabel('CD Percentage')
-                    ax.set_xlabel('Detection Functions')
-                    ax.set_xticks(indexes+0.4)
-                    ax.set_xticklabels(odf_names)
-                    plt.savefig(image_file, bbox_inches='tight')
-
-
     # F measure
     if f_measure:
         results = {}
@@ -112,16 +47,19 @@ try:
                         worst_hop_size[odf] = str(a.attrs['hop_size'])
                         worst_frame_size[odf] = str(a.attrs['frame_size'])
                         if 'prediction_frames' in a.attrs:
-                            worst_prediction_frames[odf] = str(a.attrs['prediction_frames'])
+                            worst_prediction_frames[odf] = str(
+                                a.attrs['prediction_frames']
+                            )
                         else:
                             worst_prediction_frames[odf] = ''
                     elif a.attrs['f_measure'] == worst:
                         worst_hop_size[odf] += ', ' + str(a.attrs['hop_size'])
-                        worst_frame_size[odf] += ', ' + str(a.attrs['frame_size'])
+                        worst_frame_size[odf] += ', ' + \
+                            str(a.attrs['frame_size'])
                         if 'prediction_frames' in a.attrs:
-                            worst_prediction_frames[odf] += ', ' + str(a.attrs['prediction_frames'])
+                            worst_prediction_frames[odf] += ', ' + \
+                                str(a.attrs['prediction_frames'])
             results[odf] = worst
-
 
         for odf in odfs:
             print odf + ':'
@@ -146,11 +84,11 @@ try:
             bars = ax.bar(indexes, results, width, color=colours[0])
             for bar in bars:
                 height = bar.get_height()
-                ax.text(bar.get_x()+bar.get_width()/2., 1.05*height, '%f'%height,
-                        ha='center', va='bottom')
+                ax.text(bar.get_x() + bar.get_width() / 2., 1.05 * height,
+                        '%f' % height, ha='center', va='bottom')
             ax.set_ylabel('F-Measure')
             ax.set_xlabel('Detection Functions')
-            ax.set_xticks(indexes+0.4)
+            ax.set_xticks(indexes + 0.4)
             ax.set_xticklabels(odf_names)
             plt.savefig(image_file, bbox_inches='tight')
 
@@ -171,16 +109,20 @@ try:
                         worst_hop_size[odf] = str(a.attrs['hop_size'])
                         worst_frame_size[odf] = str(a.attrs['frame_size'])
                         if 'prediction_frames' in a.attrs:
-                            worst_prediction_frames[odf] = str(a.attrs['prediction_frames'])
+                            worst_prediction_frames[odf] = str(
+                                a.attrs['prediction_frames']
+                            )
                         else:
                             worst_prediction_frames[odf] = ''
                     elif a.attrs['precision'] == worst:
-                        worst_hop_size[odf] += ', ' + str(a.attrs['hop_size'])
-                        worst_frame_size[odf] += ', ' + str(a.attrs['frame_size'])
+                        worst_hop_size[odf] += ', ' + \
+                            str(a.attrs['hop_size'])
+                        worst_frame_size[odf] += ', ' + \
+                            str(a.attrs['frame_size'])
                         if 'prediction_frames' in a.attrs:
-                            worst_prediction_frames[odf] += ', ' + str(a.attrs['prediction_frames'])
+                            worst_prediction_frames[odf] += ', ' + \
+                                str(a.attrs['prediction_frames'])
             results[odf] = worst
-
 
         for odf in odfs:
             print odf + ':'
@@ -205,11 +147,11 @@ try:
             bars = ax.bar(indexes, results, width, color=colours[0])
             for bar in bars:
                 height = bar.get_height()
-                ax.text(bar.get_x()+bar.get_width()/2., 1.05*height, '%f'%height,
-                        ha='center', va='bottom')
+                ax.text(bar.get_x() + bar.get_width() / 2., 1.05 * height,
+                        '%f' % height, ha='center', va='bottom')
             ax.set_ylabel('Precision')
             ax.set_xlabel('Detection Functions')
-            ax.set_xticks(indexes+0.4)
+            ax.set_xticks(indexes + 0.4)
             ax.set_xticklabels(odf_names)
             plt.savefig(image_file, bbox_inches='tight')
 
@@ -230,16 +172,19 @@ try:
                         worst_hop_size[odf] = str(a.attrs['hop_size'])
                         worst_frame_size[odf] = str(a.attrs['frame_size'])
                         if 'prediction_frames' in a.attrs:
-                            worst_prediction_frames[odf] = str(a.attrs['prediction_frames'])
+                            worst_prediction_frames[odf] = str(
+                                a.attrs['prediction_frames']
+                            )
                         else:
                             worst_prediction_frames[odf] = ''
                     elif a.attrs['recall'] == worst:
                         worst_hop_size[odf] += ', ' + str(a.attrs['hop_size'])
-                        worst_frame_size[odf] += ', ' + str(a.attrs['frame_size'])
+                        worst_frame_size[odf] += ', ' + \
+                            str(a.attrs['frame_size'])
                         if 'prediction_frames' in a.attrs:
-                            worst_prediction_frames[odf] += ', ' + str(a.attrs['prediction_frames'])
+                            worst_prediction_frames[odf] += ', ' + \
+                                str(a.attrs['prediction_frames'])
             results[odf] = worst
-
 
         for odf in odfs:
             print odf + ':'
@@ -264,11 +209,11 @@ try:
             bars = ax.bar(indexes, results, width, color=colours[0])
             for bar in bars:
                 height = bar.get_height()
-                ax.text(bar.get_x()+bar.get_width()/2., 1.05*height, '%f'%height,
-                        ha='center', va='bottom')
+                ax.text(bar.get_x() + bar.get_width() / 2., 1.05 * height,
+                        '%f' % height, ha='center', va='bottom')
             ax.set_ylabel('Recall')
             ax.set_xlabel('Detection Functions')
-            ax.set_xticks(indexes+0.4)
+            ax.set_xticks(indexes + 0.4)
             ax.set_xticklabels(odf_names)
             plt.savefig(image_file, bbox_inches='tight')
 
@@ -289,16 +234,19 @@ try:
                         worst_hop_size[odf] = str(a.attrs['hop_size'])
                         worst_frame_size[odf] = str(a.attrs['frame_size'])
                         if 'prediction_frames' in a.attrs:
-                            worst_prediction_frames[odf] = str(a.attrs['prediction_frames'])
+                            worst_prediction_frames[odf] = str(
+                                a.attrs['prediction_frames']
+                            )
                         else:
                             worst_prediction_frames[odf] = ''
                     elif a.attrs['false_positive_rate'] == worst:
                         worst_hop_size[odf] += ', ' + str(a.attrs['hop_size'])
-                        worst_frame_size[odf] += ', ' + str(a.attrs['frame_size'])
+                        worst_frame_size[odf] += ', ' + \
+                            str(a.attrs['frame_size'])
                         if 'prediction_frames' in a.attrs:
-                            worst_prediction_frames[odf] += ', ' + str(a.attrs['prediction_frames'])
+                            worst_prediction_frames[odf] += ', ' + \
+                                str(a.attrs['prediction_frames'])
             results[odf] = worst
-
 
         for odf in odfs:
             print odf + ':'
@@ -323,13 +271,12 @@ try:
             bars = ax.bar(indexes, results, width, color=colours[0])
             for bar in bars:
                 height = bar.get_height()
-                ax.text(bar.get_x()+bar.get_width()/2., 1.05*height, '%f'%height,
-                        ha='center', va='bottom')
+                ax.text(bar.get_x() + bar.get_width() / 2., 1.05 * height,
+                        '%f' % height, ha='center', va='bottom')
             ax.set_ylabel('False Positive Rate')
             ax.set_xlabel('Detection Functions')
-            ax.set_xticks(indexes+0.4)
+            ax.set_xticks(indexes + 0.4)
             ax.set_xticklabels(odf_names)
             plt.savefig(image_file, bbox_inches='tight')
 finally:
     db.close()
-
