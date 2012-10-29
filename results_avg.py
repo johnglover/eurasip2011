@@ -6,6 +6,30 @@ from modal.ui.plot import scheme
 import matplotlib.pyplot as plt
 from matplotlib import rc
 
+
+def plot_bars(file, results, labels, title, x_label, y_label):
+    indexes = np.arange(len(results))
+    width = 0.8
+    colours, styles = scheme(len(results), 2)
+    plt.clf()
+    plt.figure(1, figsize=(14, 9))
+    plt.title(title, fontsize=20)
+    ax = plt.axes()
+    ax.autoscale(False, 'y')
+    ax.set_ylim(0.0, 1.0)
+    bars = ax.bar(indexes, results, width, color=colours)
+    for bar in bars:
+        height = bar.get_height()
+        ax.text(bar.get_x() + bar.get_width() / 2., 1.05 * height,
+                '%.2f' % height, ha='center', va='bottom',
+                fontsize=18)
+    ax.set_ylabel(y_label, fontsize=18)
+    ax.set_xlabel(x_label, fontsize=18)
+    ax.set_xticks(indexes + 0.4)
+    ax.set_xticklabels(labels, fontsize=14)
+    plt.savefig(file, bbox_inches='tight')
+
+
 # plot results to files?
 plot_results = True
 
@@ -13,7 +37,6 @@ plot_results = True
 f_measure = True
 precision = True
 recall = True
-false_positive_rate = False
 
 # ODFs to include in results
 odfs = ['EnergyODF', 'SpectralDifferenceODF', 'ComplexODF', 'LPEnergyODF',
@@ -35,116 +58,34 @@ if plot_results:
         os.mkdir('images')
 
 try:
-    # F-Measure
     if f_measure:
         results = {}
         for odf in odfs:
             results[odf] = db['totals/odfs'][odf].attrs['f_measure']
 
         if plot_results:
-            image_file = 'images/avg_f_measure.png'
             results = [results[odf] for odf in odfs]
-            indexes = np.arange(len(odfs))
-            width = 0.8
-            colours, styles = scheme(len(odfs), 2)
-            fig = plt.figure(2, figsize=(14, 9))
-            plt.title('Average F-Measure')
-            ax = plt.axes()
-            ax.autoscale(False, 'y')
-            ax.set_ylim(0.0, 1.0)
-            bars = ax.bar(indexes, results, width, color=colours)
-            for bar in bars:
-                height = bar.get_height()
-                ax.text(bar.get_x() + bar.get_width() / 2., 1.05 * height,
-                        '%.2f' % height, ha='center', va='bottom')
-            ax.set_ylabel('F-measure')
-            ax.set_xlabel('Detection Functions')
-            ax.set_xticks(indexes + 0.4)
-            ax.set_xticklabels(odf_names)
-            plt.savefig(image_file, bbox_inches='tight')
+            plot_bars('images/avg_f_measure.png', results, odf_names,
+                      'Average F-Measure', 'Detection Functions', 'F-Measure')
 
-    # Precision
     if precision:
         results = {}
         for odf in odfs:
             results[odf] = db['totals/odfs'][odf].attrs['precision']
 
         if plot_results:
-            image_file = 'images/avg_precision.png'
             results = [results[odf] for odf in odfs]
-            indexes = np.arange(len(odfs))
-            width = 0.8
-            colours, styles = scheme(len(odfs), 2)
-            fig = plt.figure(3, figsize=(14, 9))
-            plt.title('Average Precision')
-            ax = plt.axes()
-            ax.autoscale(False, 'y')
-            ax.set_ylim(0.0, 1.0)
-            bars = ax.bar(indexes, results, width, color=colours)
-            for bar in bars:
-                height = bar.get_height()
-                ax.text(bar.get_x() + bar.get_width() / 2., 1.05 * height,
-                        '%.2f' % height, ha='center', va='bottom')
-            ax.set_ylabel('Precision')
-            ax.set_xlabel('Detection Functions')
-            ax.set_xticks(indexes + 0.4)
-            ax.set_xticklabels(odf_names)
-            plt.savefig(image_file, bbox_inches='tight')
+            plot_bars('images/avg_precision.png', results, odf_names,
+                      'Average Precision', 'Detection Functions', 'Precision')
 
-    # Recall
     if recall:
         results = {}
         for odf in odfs:
             results[odf] = db['totals/odfs'][odf].attrs['recall']
 
         if plot_results:
-            image_file = 'images/avg_recall.png'
             results = [results[odf] for odf in odfs]
-            indexes = np.arange(len(odfs))
-            width = 0.8
-            colours, styles = scheme(len(odfs), 2)
-            fig = plt.figure(4, figsize=(14, 9))
-            plt.title('Average Recall')
-            ax = plt.axes()
-            ax.autoscale(False, 'y')
-            ax.set_ylim(0.0, 1.0)
-            bars = ax.bar(indexes, results, width, color=colours)
-            for bar in bars:
-                height = bar.get_height()
-                ax.text(bar.get_x() + bar.get_width() / 2., 1.05 * height,
-                        '%.2f' % height, ha='center', va='bottom')
-            ax.set_ylabel('Recall')
-            ax.set_xlabel('Detection Functions')
-            ax.set_xticks(indexes + 0.4)
-            ax.set_xticklabels(odf_names)
-            plt.savefig(image_file, bbox_inches='tight')
-
-    # False positive rate
-    if false_positive_rate:
-        results = {}
-        for odf in odfs:
-            results[odf] = db['totals/odfs'][odf].attrs['false_positive_rate']
-
-        if plot_results:
-            image_file = 'images/avg_false_positive_rate.png'
-            results = [results[odf] for odf in odfs]
-            indexes = np.arange(len(odfs))
-            width = 0.8
-            colours, styles = scheme(len(odfs), 2)
-            fig = plt.figure(5, figsize=(14, 9))
-            plt.title('Average False Positive Rate')
-            ax = plt.axes()
-            ax.autoscale(False, 'y')
-            ax.set_ylim(0.0, 100.0)
-            bars = ax.bar(indexes, results, width, color=colours)
-            for bar in bars:
-                height = bar.get_height()
-                ax.text(bar.get_x() + bar.get_width() / 2., 1.05 * height,
-                        '%.2f' % height, ha='center', va='bottom')
-            ax.set_ylabel('False Positive Rate')
-            ax.set_xlabel('Detection Functions')
-            ax.set_xticks(indexes + 0.4)
-            ax.set_xticklabels(odf_names)
-            plt.savefig(image_file, bbox_inches='tight')
+            plot_bars('images/avg_recall.png', results, odf_names,
+                      'Average Recall', 'Detection Functions', 'Recall')
 finally:
     db.close()
