@@ -16,6 +16,13 @@ Dependencies
 * [Modal](http://github.com/johnglover/modal) (and all related dependencies)
 
 
+Modal Onset Database
+--------------------
+
+The most recent onset database (set of annotated samples) is
+[available from Dropbox](http://dl.dropbox.com/u/9444913/onsets1.1.hdf5)
+
+
 Use
 ---
 
