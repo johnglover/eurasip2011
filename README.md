@@ -40,8 +40,13 @@ This will create a HDF5 file containing the analysis results called
 
 After making an analysis database, run
 
-    $ python results_compute.py
+    $ python results.py
 
-to build a results database. The files `results_avg.py`, `results_best.py` and
-`results_worst.py` can then be used to view average,
-best and worse case results respectively for all analysis data.
+to build a results database.
+
+Running
+
+    $ python plot_results.py
+
+will create plots of the precision, recall and f-measure results
+in a directory called ``images``.
