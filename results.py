@@ -96,14 +96,13 @@ if __name__ == '__main__':
         results_db.create_group('totals')
         results_db['totals'].create_group('analysis')
         results_db['totals'].create_group('odfs')
-        # dicts used to hold total results for each analysis type
-        correctly_detected = {}
-        false_negatives = {}
-        false_positives = {}
-        # dicts used to hold total results for each odf type
-        odf_correctly_detected = {}
-        odf_false_negatives = {}
-        odf_false_positives = {}
+        # dicts used to hold total results for each analysis type and odf type
+        results = {'correctly_detected': {},
+                   'false_negatives': {},
+                   'false_positives': {},
+                   'odf_correctly_detected': {},
+                   'odf_false_negatives': {},
+                   'odf_false_positives': {}}
 
         for audio_file in analysis_db:
             # create a group in the results db for this audio file
@@ -144,26 +143,26 @@ if __name__ == '__main__':
                 cd = find_matches(correct_locations, onsets,
                                   match_samples)[0]
                 r.attrs['correctly_detected'] = cd
-                if analysis in correctly_detected:
-                    correctly_detected[analysis] += cd
+                if analysis in results['correctly_detected']:
+                    results['correctly_detected'][analysis] += cd
                 else:
-                    correctly_detected[analysis] = cd
-                if odf_type in odf_correctly_detected:
-                    odf_correctly_detected[odf_type] += cd
+                    results['correctly_detected'][analysis] = cd
+                if odf_type in results['odf_correctly_detected']:
+                    results['odf_correctly_detected'][odf_type] += cd
                 else:
-                    odf_correctly_detected[odf_type] = cd
+                    results['odf_correctly_detected'][odf_type] = cd
 
                 # false negatives
                 fn = len(correct_locations) - cd
                 r.attrs['false_negatives'] = fn
-                if analysis in false_negatives:
-                    false_negatives[analysis] += fn
+                if analysis in results['false_negatives']:
+                    results['false_negatives'][analysis] += fn
                 else:
-                    false_negatives[analysis] = fn
-                if odf_type in odf_false_negatives:
-                    odf_false_negatives[odf_type] += fn
+                    results['false_negatives'][analysis] = fn
+                if odf_type in results['odf_false_negatives']:
+                    results['odf_false_negatives'][odf_type] += fn
                 else:
-                    odf_false_negatives[odf_type] = fn
+                    results['odf_false_negatives'][odf_type] = fn
 
                 # check to see how many of the detected onsets are false
                 # positives
@@ -172,14 +171,14 @@ if __name__ == '__main__':
                                            match_samples)[0]
                 fp = len(onsets) - num_matches
                 r.attrs['false_positives'] = fp
-                if analysis in false_positives:
-                    false_positives[analysis] += fp
+                if analysis in results['false_positives']:
+                    results['false_positives'][analysis] += fp
                 else:
-                    false_positives[analysis] = fp
-                if odf_type in odf_false_positives:
-                    odf_false_positives[odf_type] += fp
+                    results['false_positives'][analysis] = fp
+                if odf_type in results['odf_false_positives']:
+                    results['odf_false_positives'][odf_type] += fp
                 else:
-                    odf_false_positives[odf_type] = fp
+                    results['odf_false_positives'][odf_type] = fp
 
                 # for each detected onset, get distance in samples to nearest
                 # correct onset
@@ -199,9 +198,9 @@ if __name__ == '__main__':
 
         # save total results for each analysis run
         print 'Calculating totals for analysis runs...'
-        for analysis, cd in correctly_detected.iteritems():
-            fn = false_negatives[analysis]
-            fp = false_positives[analysis]
+        for analysis, cd in results['correctly_detected'].iteritems():
+            fn = results['false_negatives'][analysis]
+            fp = results['false_positives'][analysis]
             p = float(cd) / (cd + fp)
             r = float(cd) / (cd + fn)
             f = (2.0 * r * p) / (p + r)
@@ -217,9 +216,9 @@ if __name__ == '__main__':
 
         # save total results for each ODF type
         print 'Calculating totals for each Onset Detection Function...'
-        for odf, cd in odf_correctly_detected.iteritems():
-            fn = odf_false_negatives[odf]
-            fp = odf_false_positives[odf]
+        for odf, cd in results['odf_correctly_detected'].iteritems():
+            fn = results['odf_false_negatives'][odf]
+            fp = results['odf_false_positives'][odf]
             p = float(cd) / (cd + fp)
             r = float(cd) / (cd + fn)
             f = (2.0 * r * p) / (p + r)
