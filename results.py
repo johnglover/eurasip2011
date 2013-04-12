@@ -1,5 +1,5 @@
-import modal
 import h5py
+
 
 class Result(object):
     def __init__(self):
@@ -27,10 +27,10 @@ class ResultSet(set):
         self.run = ""
         self.match_time = ""
         self.detection_type = "median-peak"
-        
+
     def add_total_results(self):
         pass
-        
+
     def add_file_results(self):
         try:
             db = h5py.File(self.db_path)
@@ -44,7 +44,7 @@ class ResultSet(set):
                 self._add_results_for_file(file)
         finally:
             db.close()
-            
+
     def _add_results_for_file(self, file):
         if not self.run:
             for analysis in file:
@@ -54,14 +54,14 @@ class ResultSet(set):
             # only add data for the given analysis run
             run = file[analysis]
             self._add_results_for_run(run)
-        
+
     def _add_results_for_run(self, run):
         if not self.match_time:
             for match_time in run:
                 self._add_result(run, match_time)
         else:
             self._add_result(run, match_time)
-            
+
     def _add_result(self, run, match_time):
         if not self.detection_type in run[match_time]:
             return
@@ -84,7 +84,7 @@ class ResultSet(set):
             for o in mt['nearest_onsets']:
                 r.nearest_onsets.append(o)
         self.add(r)
-    
+
     def subset(self, **kwargs):
         ss = ResultSet()
         sets = []
@@ -97,43 +97,42 @@ class ResultSet(set):
             sets.append(s)
         # return the intersection of the lists
         return ss.union(reduce(set.intersection, sets))
-    
+
     def get_all(self, var):
         s = set()
         for result in self:
             s.add(getattr(result, var))
         return sorted(s)
-    
+
     def average(self, var):
         if len(self):
             avg = 0
             for result in self:
                 avg += getattr(result, var)
             return float(avg) / len(self)
-        
+
     def highest(self, var):
         vars = self.get_all(var)
         if vars:
             max_val = max(vars)
-            return self.subset(**{var:max_val})
-    
+            return self.subset(**{var: max_val})
+
     def lowest(self, var):
         vars = self.get_all(var)
         if vars:
             min_val = min(vars)
-            return self.subset(**{var:min_val})
-    
+            return self.subset(**{var: min_val})
+
     def maximum(self, var, val):
         s = ResultSet()
         for result in self:
             if getattr(result, var) <= val:
                 s.add(result)
         return s
-    
+
     def minimum(self, var, val):
         s = ResultSet()
         for result in self:
             if getattr(result, var) >= val:
                 s.add(result)
         return s
-

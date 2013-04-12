@@ -6,6 +6,7 @@ import h5py
 import numpy as np
 from progressbar import ProgressBar
 
+
 class OnsetAnalysis(object):
     def __init__(self):
         # onset detection parameters
@@ -22,7 +23,7 @@ class OnsetAnalysis(object):
         self.onsets_path = modal.onsets_path
         # path to analysis db
         self.analysis_path = "analysis.hdf5"
-        
+
     def _status(self, message):
         if self.verbose:
             print message
@@ -31,7 +32,7 @@ class OnsetAnalysis(object):
         if not self.odf:
             raise Exception("NoODF")
 
-        name = self.odf.__class__.__name__  + "-"
+        name = self.odf.__class__.__name__ + "-"
         if hasattr(self.odf, 'order'):
             name += str(self.odf.get_order()) + "-"
         if hasattr(self.odf, 'max_peaks'):
@@ -39,29 +40,31 @@ class OnsetAnalysis(object):
         name += str(self.odf.get_frame_size()) + "-"
         name += str(self.odf.get_hop_size())
         return name
-    
+
     def _save_odf_params(self, grp):
         """Save odf parameters as attributes in the HDF5
         subgroup db_group."""
         if not self.odf:
             raise Exception("NoODF")
 
-        grp['odf'].attrs['odf_type'] =  self.odf.__class__.__name__
+        grp['odf'].attrs['odf_type'] = self.odf.__class__.__name__
         grp['odf'].attrs['frame_size'] = str(self.odf.get_frame_size())
         grp['odf'].attrs['hop_size'] = str(self.odf.get_hop_size())
         if hasattr(self.odf, 'order'):
             grp['odf'].attrs['prediction_frames'] = str(self.odf.get_order())
         if hasattr(self.odf, 'max_peaks'):
             grp['odf'].attrs['max_peaks'] = str(self.odf.get_max_peaks())
-            
+
     def onset_detection(self, audio_file):
         if not self.odf:
             raise Exception("NoODF")
 
         # pad the input audio if necessary
         if len(audio_file) % self.odf.get_frame_size() != 0:
-            pad_size = self.odf.get_frame_size() - (len(audio_file) % self.odf.get_frame_size())
-            audio_file = np.hstack((audio_file, np.zeros(pad_size, dtype=np.double)))
+            pad_size = self.odf.get_frame_size() - (
+                len(audio_file) % self.odf.get_frame_size())
+            audio_file = np.hstack((audio_file,
+                                    np.zeros(pad_size, dtype=np.double)))
         # check that file is of the correct type
         if not audio_file.dtype == np.double:
             audio_file = np.asarray(audio_file, dtype=np.double)
@@ -70,9 +73,9 @@ class OnsetAnalysis(object):
         odf_values = self.odf.process(audio_file)
         onset_det = od.OnsetDetection()
         onsets = onset_det.find_onsets(odf_values) * self.odf.get_hop_size()
-        
+
         return odf_values, onsets
-            
+
     def process(self):
         """Performs onset analysis on the given audio file.
         Results are saved in the analysis database.
@@ -87,7 +90,7 @@ class OnsetAnalysis(object):
         try:
             analysis_db = h5py.File(self.analysis_path)
             onsets_db = h5py.File(self.onsets_path, 'r')
-            
+
             # get the subgroup for this audio file
             if not self.analysis_file in analysis_db:
                 audio_grp = analysis_db.create_group(self.analysis_file)
@@ -108,26 +111,27 @@ class OnsetAnalysis(object):
             # do RT onset detection
             odf, onsets = self.onset_detection(audio_file)
             # calculate and save the onset detection function
-            self._status("Calculating ODF/onsets for " + self.analysis_file + " - " + name)
+            self._status("Calculating ODF/onsets for " +
+                         self.analysis_file + " - " + name)
             grp.create_dataset('odf', data=odf)
             self._save_odf_params(grp)
             # save onset locations
             if len(onsets):
-                onsets_dset = grp.create_dataset('onsets', data=onsets)
+                grp.create_dataset('onsets', data=onsets)
             else:
                 # can't create an empty dataset
-                onsets_dset = grp.create_group('onsets')
+                grp.create_group('onsets')
             # finished - output analysis time
             run_time = time.time() - start_time
             done_msg = "Done, in "
-            done_msg += str(int(run_time / 60)) + " mins, " 
+            done_msg += str(int(run_time / 60)) + " mins, "
             done_msg += str(int(run_time % 60)) + " secs\n"
             self._status(done_msg)
         finally:
             analysis_db.close()
             onsets_db.close()
 
-        
+
 class RTOnsetAnalysis(OnsetAnalysis):
     def onset_detection(self, audio_file):
         if not self.odf:
@@ -135,8 +139,10 @@ class RTOnsetAnalysis(OnsetAnalysis):
 
         # pad the input audio if necessary
         if len(audio_file) % self.odf.get_frame_size() != 0:
-            pad_size = self.odf.get_frame_size() - (len(audio_file) % self.odf.get_frame_size())
-            audio_file = np.hstack((audio_file, np.zeros(pad_size, dtype=np.double)))
+            pad_size = self.odf.get_frame_size() - (
+                len(audio_file) % self.odf.get_frame_size())
+            audio_file = np.hstack((audio_file,
+                                    np.zeros(pad_size, dtype=np.double)))
         # check that file is of the correct type
         if not audio_file.dtype == np.double:
             audio_file = np.asarray(audio_file, dtype=np.double)
@@ -155,7 +161,7 @@ class RTOnsetAnalysis(OnsetAnalysis):
                 onsets.append(i * self.odf.get_hop_size())
             p += self.odf.get_hop_size()
             i += 1
-        
+
         return np.array(odf_values), np.array(onsets)
 
 
@@ -164,22 +170,21 @@ class OnsetAnalysisThread(Thread):
         Thread.__init__(self)
         self.finished = Event()
         self.analysis_runs = []
-        
+
     def add(self, analysis_run):
         self.analysis_runs.append(analysis_run)
-        
+
     def num_runs(self):
         return len(self.analysis_runs)
-        
+
     def run(self):
         pb = ProgressBar(maxval=self.num_runs())
         pb.start()
-        
+
         for i in range(len(self.analysis_runs)):
             if not self.finished.isSet():
                 self.analysis_runs[i].process()
-                pb.update(i+1)
+                pb.update(i + 1)
         pb.finish()
         self.finished.set()
         print "Analysis finished. Press return to exit."
-

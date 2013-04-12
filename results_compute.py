@@ -88,9 +88,9 @@ if __name__ == "__main__":
         for audio_file in analysis_db:
             # create a group in the results db for this audio file
             if audio_file in results_db['files']:
-                result_audio_group = results_db['files'][audio_file]
+                result_group = results_db['files'][audio_file]
             else:
-                result_audio_group = results_db['files'].create_group(audio_file)
+                result_group = results_db['files'].create_group(audio_file)
 
             # get the correct information
             correct_locations = onsets_db[audio_file].attrs['onsets']
@@ -106,10 +106,10 @@ if __name__ == "__main__":
                     add_params(t, file[analysis]['odf'])
 
                 # create a group for this analysis run in the files db
-                if analysis in result_audio_group:
-                    analysis_results = result_audio_group[analysis]
+                if analysis in result_group:
+                    analysis_results = result_group[analysis]
                 else:
-                    analysis_results = result_audio_group.create_group(analysis)
+                    analysis_results = result_group.create_group(analysis)
                     add_params(analysis_results, file[analysis]['odf'])
 
                 r = analysis_results.create_group(str(match_time))
