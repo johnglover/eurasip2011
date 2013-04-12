@@ -33,7 +33,7 @@ This defaults to the `data` folder in the package directory.
 
 Run:
 
-    $ python analysis_rt.py
+    $ python analysis.py
 
 This will create a HDF5 file containing the analysis results called
 `analysis.hdf5` in the same directory.
