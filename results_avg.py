@@ -43,7 +43,7 @@ odfs = ['EnergyODF', 'SpectralDifferenceODF', 'ComplexODF', 'LPEnergyODF',
         'LPSpectralDifferenceODF', 'LPComplexODF', 'PeakAmpDifferenceODF']
 
 # shorter names for plotting
-odf_names = ["E", "SD", "CD", "ELP", "SDLP", "CDLP", "PAD"]
+odf_names = ['E', 'SD', 'CD', 'ELP', 'SDLP', 'CDLP', 'PAD']
 # odf_names = [r'$\text{ODF}_{\rm E}$', r'$\text{ODF}_{\rm SD}$',
 #              r'$\text{ODF}_{\rm CD}$', r'$\text{ODF}_{\rm ELP}$',
 #              r'$\text{ODF}_{\rm SDLP}$', r'$\text{ODF}_{\rm CDLP}$',

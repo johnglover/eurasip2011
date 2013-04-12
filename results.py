@@ -3,16 +3,16 @@ import h5py
 
 class Result(object):
     def __init__(self):
-        self.name = ""
-        self.file = ""
-        self.odf_type = ""
+        self.name = ''
+        self.file = ''
+        self.odf_type = ''
         self.frame_size = 0
         self.hop_size = 0
         self.smooth_type = 0
         self.detection_rate = 0
         self.false_positive_rate = 0
         self.prediction_frames = 1
-        self.prediction_type = ""
+        self.prediction_type = ''
         self.match_time = 0
         self.threshold_type = 0
         self.onset_location = 0
@@ -22,11 +22,11 @@ class Result(object):
 class ResultSet(set):
     def __init__(self):
         set.__init__(self)
-        self.db_path = "results.hdf5"
-        self.audio_file = ""
-        self.run = ""
-        self.match_time = ""
-        self.detection_type = "median-peak"
+        self.db_path = 'results.hdf5'
+        self.audio_file = ''
+        self.run = ''
+        self.match_time = ''
+        self.detection_type = 'median-peak'
 
     def add_total_results(self):
         pass
@@ -68,8 +68,8 @@ class ResultSet(set):
         mt = run[match_time][self.detection_type]
         r = Result()
         r.match_time = int(match_time)
-        r.name = run.name.split("/")[-1]
-        r.file = run.parent.name.split("/")[-1]
+        r.name = run.name.split('/')[-1]
+        r.file = run.parent.name.split('/')[-1]
         r.odf_type = run.attrs['odf_type']
         r.frame_size = run.attrs['frame_size']
         r.hop_size = run.attrs['hop_size']

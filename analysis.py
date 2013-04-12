@@ -18,11 +18,11 @@ class OnsetAnalysis(object):
         # set to True to print out more information. Useful for debugging
         self.verbose = False
         # the file to analyse
-        self.analysis_file = ""
+        self.analysis_file = ''
         # path to onsets db
         self.onsets_path = modal.onsets_path
         # path to analysis db
-        self.analysis_path = "analysis.hdf5"
+        self.analysis_path = 'analysis.hdf5'
 
     def _status(self, message):
         if self.verbose:
@@ -30,22 +30,24 @@ class OnsetAnalysis(object):
 
     def _get_analysis_name(self):
         if not self.odf:
-            raise Exception("NoODF")
+            raise Exception('NoODF')
 
-        name = self.odf.__class__.__name__ + "-"
+        name = self.odf.__class__.__name__ + '-'
         if hasattr(self.odf, 'order'):
-            name += str(self.odf.get_order()) + "-"
+            name += str(self.odf.get_order()) + '-'
         if hasattr(self.odf, 'max_peaks'):
-            name += str(self.odf.get_max_peaks()) + "-"
-        name += str(self.odf.get_frame_size()) + "-"
+            name += str(self.odf.get_max_peaks()) + '-'
+        name += str(self.odf.get_frame_size()) + '-'
         name += str(self.odf.get_hop_size())
         return name
 
     def _save_odf_params(self, grp):
-        """Save odf parameters as attributes in the HDF5
-        subgroup db_group."""
+        '''
+        Save odf parameters as attributes in the HDF5
+        subgroup db_group.
+        '''
         if not self.odf:
-            raise Exception("NoODF")
+            raise Exception('NoODF')
 
         grp['odf'].attrs['odf_type'] = self.odf.__class__.__name__
         grp['odf'].attrs['frame_size'] = str(self.odf.get_frame_size())
@@ -57,7 +59,7 @@ class OnsetAnalysis(object):
 
     def onset_detection(self, audio_file):
         if not self.odf:
-            raise Exception("NoODF")
+            raise Exception('NoODF')
 
         # pad the input audio if necessary
         if len(audio_file) % self.odf.get_frame_size() != 0:
@@ -77,13 +79,15 @@ class OnsetAnalysis(object):
         return odf_values, onsets
 
     def process(self):
-        """Performs onset analysis on the given audio file.
+        '''
+        Performs onset analysis on the given audio file.
         Results are saved in the analysis database.
         If self.recalculate is False, it will not recompute the results if
-        analysis results with the same name already exist."""
+        analysis results with the same name already exist.
+        '''
         # check that analysis file has been set
         if not self.analysis_file:
-            self._status("No analysis file specified, ignoring")
+            self._status('No analysis file specified, ignoring')
             return
 
         # connect to db
@@ -100,7 +104,7 @@ class OnsetAnalysis(object):
             name = self._get_analysis_name()
             if name in audio_grp:
                 if not self.recalculate:
-                    self._status("Skipping analysis for " + self.analysis_file)
+                    self._status('Skipping analysis for ' + self.analysis_file)
                     return
                 else:
                     del audio_grp[name]
@@ -111,8 +115,8 @@ class OnsetAnalysis(object):
             # do RT onset detection
             odf, onsets = self.onset_detection(audio_file)
             # calculate and save the onset detection function
-            self._status("Calculating ODF/onsets for " +
-                         self.analysis_file + " - " + name)
+            self._status('Calculating ODF/onsets for ' +
+                         self.analysis_file + ' - ' + name)
             grp.create_dataset('odf', data=odf)
             self._save_odf_params(grp)
             # save onset locations
@@ -123,9 +127,9 @@ class OnsetAnalysis(object):
                 grp.create_group('onsets')
             # finished - output analysis time
             run_time = time.time() - start_time
-            done_msg = "Done, in "
-            done_msg += str(int(run_time / 60)) + " mins, "
-            done_msg += str(int(run_time % 60)) + " secs\n"
+            done_msg = 'Done, in '
+            done_msg += str(int(run_time / 60)) + ' mins, '
+            done_msg += str(int(run_time % 60)) + ' secs\n'
             self._status(done_msg)
         finally:
             analysis_db.close()
@@ -135,7 +139,7 @@ class OnsetAnalysis(object):
 class RTOnsetAnalysis(OnsetAnalysis):
     def onset_detection(self, audio_file):
         if not self.odf:
-            raise Exception("NoODF")
+            raise Exception('NoODF')
 
         # pad the input audio if necessary
         if len(audio_file) % self.odf.get_frame_size() != 0:
@@ -187,4 +191,8 @@ class OnsetAnalysisThread(Thread):
                 pb.update(i + 1)
         pb.finish()
         self.finished.set()
-        print "Analysis finished. Press return to exit."
+        print 'Analysis finished. Press return to exit.'
+
+
+if __name__ == '__main__':
+    pass

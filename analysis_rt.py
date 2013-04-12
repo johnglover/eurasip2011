@@ -23,15 +23,15 @@ for file in files:
         run_thread.add(oa)
 
 start_time = time.time()
-print "Starting analysis."
-print "Press return to stop after the current analysis run"
+print 'Starting analysis.'
+print 'Press return to stop after the current analysis run'
 print
 run_thread.start()
 while not run_thread.finished.isSet():
-    if raw_input() == "":
+    if raw_input() == '':
         run_thread.finished.set()
 run_thread.join()
 run_time = time.time() - start_time
-print "Total running time:",
-print int(run_time / 60), "mins,",
-print int(run_time % 60), "secs"
+print 'Total running time:',
+print int(run_time / 60), 'mins,',
+print int(run_time % 60), 'secs'

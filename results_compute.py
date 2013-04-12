@@ -6,7 +6,8 @@ import modal
 
 
 def find_matches(ar1, ar2, limit):
-    """For each element in ar1, see if there is a matching
+    '''
+    For each element in ar1, see if there is a matching
     element in ar2. A match is found if abs(ar1 - ar2) <= limit.
     Returns an array giving the position in ar2 of the match
     for the corresponding element in ar1. The value in the returned
@@ -16,7 +17,8 @@ def find_matches(ar1, ar2, limit):
 
     Example: If the first element in ar1 has a matching element
              at the 3rd element in ar2, and r is the return array,
-             r[0] = 2"""
+             r[0] = 2
+    '''
     matches = np.ones(len(ar1)) * -1
     paired1 = np.zeros(len(ar1))
     paired2 = np.zeros(len(ar2))
@@ -37,7 +39,7 @@ def find_matches(ar1, ar2, limit):
 
 
 def nearest_match(n, values):
-    """Returns the nearest value in values to n, or None values is None."""
+    '''Returns the nearest value in values to n, or None values is None.'''
     if not len(values):
         return None
     distance = abs(n - values[0])
@@ -50,13 +52,13 @@ def nearest_match(n, values):
 
 
 def add_params(group, target):
-    """Add all members of target.attrs to the group.attrs"""
+    '''Add all members of target.attrs to the group.attrs'''
     for p in target.attrs:
         group.attrs[p] = target.attrs[p]
 
 
-if __name__ == "__main__":
-    print "Calculating results..."
+if __name__ == '__main__':
+    print 'Calculating results...'
     pb = ProgressBar()
     pb.start()
     current_file = 0
@@ -179,7 +181,7 @@ if __name__ == "__main__":
         pb.finish()
 
         # save total results for each analysis run
-        print "Calculating totals for analysis runs..."
+        print 'Calculating totals for analysis runs...'
         for analysis, cd in correctly_detected.iteritems():
             fn = false_negatives[analysis]
             fp = false_positives[analysis]
@@ -197,7 +199,7 @@ if __name__ == "__main__":
             g.attrs['false_positive_rate'] = fpr
 
         # save total results for each ODF type
-        print "Calculating totals for each Onset Detection Function..."
+        print 'Calculating totals for each Onset Detection Function...'
         for odf, cd in odf_correctly_detected.iteritems():
             fn = odf_false_negatives[odf]
             fp = odf_false_positives[odf]
@@ -219,7 +221,7 @@ if __name__ == "__main__":
         analysis_db.close()
         results_db.close()
 
-    print "Done. Total running time:",
+    print 'Done. Total running time:',
     run_time = time.time() - start_time
-    print int(run_time / 60), "mins,",
-    print int(run_time % 60), "secs"
+    print int(run_time / 60), 'mins,',
+    print int(run_time % 60), 'secs'
