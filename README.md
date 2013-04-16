@@ -46,7 +46,15 @@ to build a results database.
 
 Running
 
-    $ python plot_results.py
+    $ python results_by_odf.py
 
 will create plots of the precision, recall and f-measure results
 in a directory called ``images``.
+
+Running
+
+    $ python results_by_sound_type.py
+
+will print the results for a specific ODF for each "type" of sound.
+The current sound types are Non-Pitched Percussive, Pitched Non-Percussive,
+Pitched Percussive and Mixed.
