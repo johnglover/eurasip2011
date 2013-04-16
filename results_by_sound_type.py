@@ -51,7 +51,7 @@ try:
 
         print '{0}:'.format(odf)
         for sound_type in results:
-            print '{0}: {1}'.format(sound_type, results[sound_type])
+            print '{0}: {1:.2f}'.format(sound_type, results[sound_type])
         print
 
 finally:
