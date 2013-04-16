@@ -21,7 +21,7 @@ def plot_bars(file, results, labels, title, x_label, y_label):
     for bar in bars:
         height = bar.get_height()
         ax.text(bar.get_x() + bar.get_width() / 2., 1.05 * height,
-                '%.2f' % (height + 0.005), ha='center', va='bottom',
+                '%.2f' % height, ha='center', va='bottom',
                 fontsize=18)
     ax.set_ylabel(y_label, fontsize=18)
     ax.set_xlabel(x_label, fontsize=18)
