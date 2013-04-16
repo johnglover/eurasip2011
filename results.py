@@ -204,7 +204,6 @@ if __name__ == '__main__':
             p = float(cd) / (cd + fp)
             r = float(cd) / (cd + fn)
             f = (2.0 * r * p) / (p + r)
-            fpr = (100.0 * fp) / (cd + fp)
             g = results_db['totals/analysis'][analysis]
             g.attrs['correctly_detected'] = cd
             g.attrs['false_negatives'] = fn
@@ -212,7 +211,6 @@ if __name__ == '__main__':
             g.attrs['precision'] = p
             g.attrs['recall'] = r
             g.attrs['f_measure'] = f
-            g.attrs['false_positive_rate'] = fpr
 
         # save total results for each ODF type
         print 'Calculating totals for each Onset Detection Function...'
@@ -222,7 +220,6 @@ if __name__ == '__main__':
             p = float(cd) / (cd + fp)
             r = float(cd) / (cd + fn)
             f = (2.0 * r * p) / (p + r)
-            fpr = (100.0 * fp) / (cd + fp)
             odf_grp = results_db['totals/odfs'].create_group(odf)
             odf_grp.attrs['correctly_detected'] = cd
             odf_grp.attrs['false_negatives'] = fn
@@ -230,7 +227,6 @@ if __name__ == '__main__':
             odf_grp.attrs['precision'] = p
             odf_grp.attrs['recall'] = r
             odf_grp.attrs['f_measure'] = f
-            odf_grp.attrs['false_positive_rate'] = fpr
 
     finally:
         onsets_db.close()
