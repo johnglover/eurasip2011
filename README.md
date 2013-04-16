@@ -55,6 +55,7 @@ Running
 
     $ python results_by_sound_type.py
 
-will print the results for a specific ODF for each "type" of sound.
+will print the average F-measure results for each "type" of sound
+(for each ODF separately).
 The current sound types are Non-Pitched Percussive, Pitched Non-Percussive,
 Pitched Percussive and Mixed.
