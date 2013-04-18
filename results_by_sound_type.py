@@ -10,9 +10,18 @@ def f_measure(correctly_detected, false_positives, false_negatives):
     return (2.0 * recall * precision) / (precision + recall)
 
 
-odfs = ['EnergyODF', 'SpectralDifferenceODF', 'ComplexODF',
-        'LPEnergyODF', 'LPSpectralDifferenceODF', 'LPComplexODF',
+odfs = ['EnergyODF',
+        'SpectralDifferenceODF',
+        'ComplexODF',
+        'LPEnergyODF',
+        'LPSpectralDifferenceODF',
+        'LPComplexODF',
         'PeakAmpDifferenceODF']
+
+sound_types = ['Non-Pitched Percussive',
+               'Pitched Percussive',
+               'Pitched Non-Percussive',
+               'Mixed']
 
 num_onsets = modal.num_onsets()
 match_time = 50
@@ -20,39 +29,33 @@ match_time = 50
 onsets_db = h5py.File(modal.onsets_path, 'r')
 db = h5py.File('results.hdf5', 'r')
 
+results = {odf: {t: {'cd': 0.0, 'fp': 0.0, 'fn': 0.0} for t in sound_types}
+           for odf in odfs}
+
 try:
 
-    for odf in odfs:
-        results = {}
-        sound_type_count = {}
+    for file in db['files']:
+        for analysis in db['files'][file]:
+            odf = db['files'][file][analysis].attrs['odf_type']
 
-        for file in db['files']:
-            for analysis in db['files'][file]:
-                if not db['files'][file][analysis].attrs['odf_type'] == odf:
-                    continue
+            file_results = db['files'][file][analysis][str(match_time)]
+            cd = float(file_results.attrs['correctly_detected'])
+            fp = float(file_results.attrs['false_positives'])
+            fn = float(file_results.attrs['false_negatives'])
 
-                file_results = db['files'][file][analysis][str(match_time)]
-
-                cd = float(file_results.attrs['correctly_detected'])
-                fp = float(file_results.attrs['false_positives'])
-                fn = float(file_results.attrs['false_negatives'])
-                f = f_measure(cd, fp, fn)
-
-                sound_type = onsets_db[file].attrs['type']
-                if not sound_type in results:
-                    results[sound_type] = f
-                    sound_type_count[sound_type] = 1
-                else:
-                    results[sound_type] += f
-                    sound_type_count[sound_type] += 1
-
-        for sound_type in results:
-            results[sound_type] /= sound_type_count[sound_type]
-
-        print '{0}:'.format(odf)
-        for sound_type in results:
-            print '{0}: {1:.2f}'.format(sound_type, results[sound_type])
-        print
+            sound_type = onsets_db[file].attrs['type']
+            results[odf][sound_type]['cd'] += cd
+            results[odf][sound_type]['fp'] += fp
+            results[odf][sound_type]['fn'] += fn
 
 finally:
     db.close()
+
+for odf in odfs:
+    print '{0}:'.format(odf)
+    for t in sound_types:
+        f = f_measure(results[odf][t]['cd'],
+                      results[odf][t]['fp'],
+                      results[odf][t]['fn'])
+        print '{0}: {1:.2f}'.format(t, f)
+    print
