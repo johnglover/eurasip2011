@@ -49,6 +49,7 @@ try:
             results[odf][sound_type]['fn'] += fn
 
 finally:
+    onsets_db.close()
     db.close()
 
 for odf in odfs:
